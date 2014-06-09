@@ -48,14 +48,14 @@ public class Main {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws XMPPException, IOException {
-        if (args.length < 1) {
-            System.err.println("Usage: JabberBot1 <config.properties>");
+        if (args.length < 2) {
+            System.err.println("Usage: JabberBot1 <sample1 | echo> <config.properties>");
             System.exit(-1);
             return;
         }
 
         // Load config file
-        String configFile = args[0];
+        String configFile = args[1];
         Properties config = new Properties();
         InputStream in = null;
         try {
@@ -82,34 +82,46 @@ public class Main {
         System.out.println("password (length): " + password.length());
         System.out.println("serviceName: " + serviceName);
 
-        // declare variables
-        MyMessageListener c = new MyMessageListener(serverHost, serverPort, serviceName);
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String msg;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        // turn on the enhanced debugger
-        XMPPConnection.DEBUG_ENABLED = true;
+        if ("sample1".equalsIgnoreCase(args[0])) {
+            final Sample1JabberBot bot = new Sample1JabberBot(serverHost, serverPort, serviceName);
 
-        // Enter your login information here
-        c.login(username, password);
+            // turn on the enhanced debugger
+            XMPPConnection.DEBUG_ENABLED = true;
 
-        c.displayBuddyList();
+            // Enter your login information here
+            bot.login(username, password);
 
-        System.out.println("-----");
+            System.out.println("-----");
 
-        System.out.println("Who do you want to talk to? - Type contacts full email address:");
-        String talkTo = br.readLine();
+            System.out.println("Who do you want to talk to? - Type contacts full email address:");
+            String talkTo = br.readLine();
 
-        System.out.println("-----");
-        System.out.println("All messages will be sent to " + talkTo);
-        System.out.println("Enter your message in the console:");
-        System.out.println("-----\n");
+            System.out.println("-----");
+            System.out.println("All messages will be sent to " + talkTo);
+            System.out.println("Enter your message in the console:");
+            System.out.println("-----\n");
 
-        while (!(msg = br.readLine()).equals("bye")) {
-            c.sendMessage(msg, talkTo);
+            while (!(msg = br.readLine()).equals("bye")) {
+                bot.sendMessage(msg, talkTo);
+            }
+
+            bot.disconnect();
+        } else if ("echo".equalsIgnoreCase(args[0])) {
+            JabberBot bot = new EchoJabberBot(serverHost, serverPort, serviceName);
+            bot.login(username, password);
+
+            System.out.println("Echo bot online, press ENTER to disconnect.");
+            br.readLine();
+            bot.disconnect();
+        } else {
+            System.err.println("Supported values: " + "sample1, echo");
+            System.exit(-2);
+            return;
         }
 
-        c.disconnect();
         System.exit(0);
     }
 

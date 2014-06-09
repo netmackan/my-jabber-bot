@@ -19,11 +19,9 @@ package com.markuspage.jabber.bot1;
 
 import java.util.Collection;
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
@@ -33,44 +31,25 @@ import org.jivesoftware.smack.packet.Message;
  *
  * @author Markus Kilås
  */
-public class MyMessageListener implements MessageListener {
+public class Sample1JabberBot extends AbstractJabberBot implements MessageListener, JabberBot {
 
-    private XMPPConnection connection;
-    private final String serverHost;
-    private final int serverPort;
-    private final String serviceName;
-
-    public MyMessageListener(String serverHost, int serverPort, String serviceName) {
-        this.serverHost = serverHost;
-        this.serverPort = serverPort;
-        this.serviceName = serviceName;
-    }
-
-    public void login(String userName, String password) throws XMPPException {
-        ConnectionConfiguration config = new ConnectionConfiguration(serverHost, serverPort);
-        config.setServiceName(serviceName);
-        connection = new XMPPConnection(config);
-        connection.connect();
-        connection.login(userName, password);
+    public Sample1JabberBot(String serverHost, int serverPort, String serviceName) {
+        super(serverHost, serverPort, serviceName);
     }
 
     public void sendMessage(String message, String to) throws XMPPException {
-        Chat chat = connection.getChatManager().createChat(to, this);
+        Chat chat = getConnection().getChatManager().createChat(to, this);
         chat.sendMessage(message);
     }
 
     public void displayBuddyList() {
-        Roster roster = connection.getRoster();
+        Roster roster = getConnection().getRoster();
         Collection<RosterEntry> entries = roster.getEntries();
 
         System.out.println("\n\n" + entries.size() + " buddy(ies):");
         for(RosterEntry r : entries) {
             System.out.println(r.getUser());
         }
-    }
-
-    public void disconnect() {
-        connection.disconnect();
     }
 
     @Override
