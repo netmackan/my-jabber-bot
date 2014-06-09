@@ -29,12 +29,23 @@ import org.jivesoftware.smack.XMPPException;
 
 /**
  *
+ * Sample config.properties:
+ * <pre>
+ * serverhost=im.example.com
+ * serverport=5222
+ * username=testuser1
+ * password=foo123
+ * servicename=example.com
+ * </pre>
+ *
  * @author Markus Kilås
  */
 public class Main {
 
     /**
      * @param args the command line arguments
+     * @throws org.jivesoftware.smack.XMPPException
+     * @throws java.io.IOException
      */
     public static void main(String[] args) throws XMPPException, IOException {
         if (args.length < 1) {
@@ -63,21 +74,21 @@ public class Main {
         int serverPort = Integer.parseInt(config.getProperty("serverport"));
         String username = config.getProperty("username");
         String password = config.getProperty("password");
+        String serviceName = config.getProperty("servicename");
 
         System.out.println("serverHost: " + serverHost);
         System.out.println("serverPort: " + serverPort);
         System.out.println("username: " + username);
         System.out.println("password (length): " + password.length());
+        System.out.println("serviceName: " + serviceName);
 
         // declare variables
-        MyMessageListener c = new MyMessageListener(serverHost, serverPort);
+        MyMessageListener c = new MyMessageListener(serverHost, serverPort, serviceName);
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String msg;
 
-
         // turn on the enhanced debugger
         XMPPConnection.DEBUG_ENABLED = true;
-
 
         // Enter your login information here
         c.login(username, password);

@@ -17,7 +17,6 @@
 
 package com.markuspage.jabber.bot1;
 
-import java.net.InetAddress;
 import java.util.Collection;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -39,16 +38,18 @@ public class MyMessageListener implements MessageListener {
     private XMPPConnection connection;
     private final String serverHost;
     private final int serverPort;
+    private final String serviceName;
 
-    public MyMessageListener(String serverHost, int serverPort) {
+    public MyMessageListener(String serverHost, int serverPort, String serviceName) {
         this.serverHost = serverHost;
         this.serverPort = serverPort;
+        this.serviceName = serviceName;
     }
 
     public void login(String userName, String password) throws XMPPException {
         ConnectionConfiguration config = new ConnectionConfiguration(serverHost, serverPort);
+        config.setServiceName(serviceName);
         connection = new XMPPConnection(config);
-
         connection.connect();
         connection.login(userName, password);
     }
