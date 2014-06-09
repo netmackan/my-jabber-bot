@@ -110,12 +110,14 @@ public class Main {
 
             bot.disconnect();
         } else if ("echo".equalsIgnoreCase(args[0])) {
-            JabberBot bot = new EchoJabberBot(serverHost, serverPort, serviceName);
+            final JabberBot bot = new EchoJabberBot(serverHost, serverPort, serviceName);
             bot.login(username, password);
 
-            System.out.println("Echo bot online, press ENTER to disconnect.");
-            br.readLine();
-            bot.disconnect();
+            synchronized (bot) {
+                try {
+                    bot.wait();
+                } catch (InterruptedException ex) {}
+            }
         } else {
             System.err.println("Supported values: " + "sample1, echo");
             System.exit(-2);
