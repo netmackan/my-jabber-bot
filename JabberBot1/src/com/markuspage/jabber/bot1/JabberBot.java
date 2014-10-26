@@ -27,6 +27,6 @@ public interface JabberBot {
 
     void disconnect();
 
-    void login(String userName, String password) throws XMPPException;
+    void login(String userName, String password, String resource) throws XMPPException;
 
 }

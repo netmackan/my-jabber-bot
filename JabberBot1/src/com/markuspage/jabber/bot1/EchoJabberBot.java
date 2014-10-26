@@ -52,8 +52,8 @@ public class EchoJabberBot extends AbstractJabberBot {
     }
 
     @Override
-    public void login(String userName, String password) throws XMPPException {
-        super.login(userName, password);
+    public void login(String userName, String password, String resource) throws XMPPException {
+        super.login(userName, password, resource);
         getConnection().getChatManager().addChatListener(new ChatManagerListener() {
 
             @Override

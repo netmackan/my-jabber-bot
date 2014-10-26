@@ -38,12 +38,12 @@ public abstract class AbstractJabberBot implements JabberBot {
     }
 
     @Override
-    public void login(String userName, String password) throws XMPPException {
+    public void login(String userName, String password, String resource) throws XMPPException {
         ConnectionConfiguration config = new ConnectionConfiguration(serverHost, serverPort);
         config.setServiceName(serviceName);
         connection = new XMPPConnection(config);
         connection.connect();
-        connection.login(userName, password);
+        connection.login(userName, password, resource);
     }
 
     @Override

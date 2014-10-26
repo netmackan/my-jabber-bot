@@ -49,7 +49,9 @@ public class Main {
      */
     public static void main(String[] args) throws XMPPException, IOException {
         if (args.length < 2) {
-            System.err.println("Usage: JabberBot1 <sample1 | echo> <config.properties>");
+            System.err.println("Usage: JabberBot1 <sample1 | echo | pipe> <config.properties>");
+            System.err.println("Usage: JabberBot1 <sample1 | echo> | pipe> <config.properties> <resource>");
+            System.err.println("Usage: JabberBot1 messages <config.properties> <resource> <messagesFolder> <nickname> <room1,room2,...>");
             System.exit(-1);
             return;
         }
@@ -67,6 +69,11 @@ public class Main {
                     in.close();
                 } catch (IOException ignored) {} // NOPMD
             }
+        }
+
+        String resource = null;
+        if (args.length > 2) {
+            resource = args[2];
         }
 
         // Load config values
@@ -92,7 +99,7 @@ public class Main {
             XMPPConnection.DEBUG_ENABLED = true;
 
             // Enter your login information here
-            bot.login(username, password);
+            bot.login(username, password, resource);
 
             System.out.println("-----");
 
@@ -111,7 +118,37 @@ public class Main {
             bot.disconnect();
         } else if ("echo".equalsIgnoreCase(args[0])) {
             final JabberBot bot = new EchoJabberBot(serverHost, serverPort, serviceName);
-            bot.login(username, password);
+            bot.login(username, password, resource);
+
+            synchronized (bot) {
+                try {
+                    bot.wait();
+                } catch (InterruptedException ex) {}
+            }
+        } else if ("messages".equalsIgnoreCase(args[0])) {
+            final String messagesFolderProperty = args[3];
+            final String nick = args[4];
+            final String roomsProperty = args[5];
+
+            final PipeJabberBot bot = new PipeJabberBot(serverHost, serverPort, serviceName);
+            bot.login(username, password, resource);
+
+            final File messagesFolder = new File(messagesFolderProperty);
+            if (!messagesFolder.exists() && messagesFolder.isDirectory()) {
+                System.err.println("Not a directory: " + messagesFolder.getAbsolutePath());
+                System.exit(-2);
+                return;
+            }
+
+            // Join each configured chat room
+            final String[] rooms = roomsProperty.split(",");
+            for (String room : rooms) {
+                System.out.println("Will try to join MUC: " + room);
+                bot.joinMUC(room, nick);
+            }
+
+            // Start monitoring the folder
+            bot.monitorFolder(messagesFolder);
 
             synchronized (bot) {
                 try {
@@ -119,7 +156,7 @@ public class Main {
                 } catch (InterruptedException ex) {}
             }
         } else {
-            System.err.println("Supported values: " + "sample1, echo");
+            System.err.println("Supported values: " + "sample1, echo, messages");
             System.exit(-2);
             return;
         }
