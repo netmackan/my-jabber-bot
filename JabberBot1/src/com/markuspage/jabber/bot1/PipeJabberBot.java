@@ -35,7 +35,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 /**
- * Bot echoing back everything said to it.
+ * Bot echoing the content of each file in a directory.
  *
  * @author Markus Kilås
  */
@@ -104,6 +104,26 @@ public class PipeJabberBot extends AbstractJabberBot {
         }
     }
 
+    /**
+     * Process each file in the folder.
+     * @param folder to read from
+     * @throws IOException in case of error
+     */
+    public void processFolder(final File folder) throws IOException {
+        if (!folder.exists()) {
+            throw new IOException("No such folder: " + folder.getAbsolutePath());
+        }
+        for (File file : folder.listFiles()) {
+            System.out.println("Found file: " + file.getName());
+            processFile(file);
+        }
+    }
+
+    /**
+     * Start monitoring the folder for new files.
+     * @param folder to read from
+     * @throws IOException in case of error
+     */
     public void monitorFolder(final File folder) throws IOException {
         if (!folder.exists()) {
             throw new IOException("No such folder: " + folder.getAbsolutePath());
@@ -116,26 +136,7 @@ public class PipeJabberBot extends AbstractJabberBot {
             @Override
             public void onFileCreate(File file) {
                 System.out.println("File created: " + file.getName());
-                try {
-                    String message = org.apache.commons.io.FileUtils.readFileToString(file);
-                    for (MultiUserChat muc : mucs) {
-                        try {
-                            muc.sendMessage(message);
-                        } catch (XMPPException ex) {
-                            Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                    file.delete();
-                } catch (IOException ex) {
-                    Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex);
-                    for (MultiUserChat muc : mucs) {
-                        try {
-                            muc.sendMessage("I failed to read file: " + ex.getMessage());
-                        } catch (XMPPException ex1) {
-                            Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex1);
-                        }
-                    }
-                }
+                processFile(file);
             }
 
         };
@@ -149,6 +150,29 @@ public class PipeJabberBot extends AbstractJabberBot {
             for (MultiUserChat muc : mucs) {
                 try {
                     muc.sendMessage("I failed to start monitoring: " + ex.getMessage());
+                } catch (XMPPException ex1) {
+                    Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            }
+        }
+    }
+
+    private void processFile(final File file) {
+        try {
+            String message = org.apache.commons.io.FileUtils.readFileToString(file);
+            for (MultiUserChat muc : mucs) {
+                try {
+                    muc.sendMessage(message);
+                } catch (XMPPException ex) {
+                    Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            file.delete();
+        } catch (IOException ex) {
+            Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex);
+            for (MultiUserChat muc : mucs) {
+                try {
+                    muc.sendMessage("I failed to read file: " + ex.getMessage());
                 } catch (XMPPException ex1) {
                     Logger.getLogger(PipeJabberBot.class.getName()).log(Level.SEVERE, null, ex1);
                 }

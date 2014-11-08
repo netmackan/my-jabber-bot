@@ -147,6 +147,9 @@ public class Main {
                 bot.joinMUC(room, nick);
             }
 
+            // Check for old messages
+            bot.processFolder(messagesFolder);
+
             // Start monitoring the folder
             bot.monitorFolder(messagesFolder);
 
