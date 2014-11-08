@@ -21,9 +21,10 @@ AUTHOR=`svnlook author $REPOS -r $REV`
 CHANGES=`svnlook changed $REPOS -r $REV`
 MESSAGE=`svnlook log $REPOS -r $REV`
 
-MSGDIR=/tmp/messages/
+MSGDIR="/tmp/commit-messages/$REPONAME"
 
 mkdir -p "$MSGDIR"
+chmod a+rw "$MSGDIR"
 FILE=$MSGDIR/commit-$REV-`date +%s`.msg
 
 cat << _EOF_ > ${FILE}
